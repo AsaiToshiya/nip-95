@@ -29,6 +29,24 @@
     <script>
       const relays = ["ws://localhost:7000"];
 
+      const createEvent = () => {
+        const sk = window.NostrTools.nip19.decode(nsec.value).data;
+        const pk = window.NostrTools.getPublicKey(sk);
+
+        return window.NostrTools.finishEvent(
+          {
+            kind: 1064,
+            created_at: Math.floor(Date.now() / 1000),
+            tags: [
+              ["type", type],
+              ["p", pk],
+            ],
+            content: base64.split(",")[1],
+          },
+          sk
+        );
+      };
+
       const handleChange = (e) => {
         const file = e.target.files[0];
         const fileReader = new FileReader();
@@ -43,21 +61,7 @@
       };
 
       const handleClick = async () => {
-        const sk = window.NostrTools.nip19.decode(nsec.value).data;
-        const pk = window.NostrTools.getPublicKey(sk);
-
-        const event = window.NostrTools.finishEvent(
-          {
-            kind: 1064,
-            created_at: Math.floor(Date.now() / 1000),
-            tags: [
-              ["type", type],
-              ["p", pk],
-            ],
-            content: base64.split(",")[1],
-          },
-          sk
-        );
+        const event = createEvent();
 
         const pool = new window.NostrTools.SimplePool();
         pool.publish(relays, event);
@@ -67,21 +71,7 @@
       };
 
       const handleStringifyClick = async () => {
-        const sk = window.NostrTools.nip19.decode(nsec.value).data;
-        const pk = window.NostrTools.getPublicKey(sk);
-
-        const event = window.NostrTools.finishEvent(
-          {
-            kind: 1064,
-            created_at: Math.floor(Date.now() / 1000),
-            tags: [
-              ["type", type],
-              ["p", pk],
-            ],
-            content: base64.split(",")[1],
-          },
-          sk
-        );
+        const event = createEvent();
 
         json.innerText = JSON.stringify(event, null, 2);
       };
